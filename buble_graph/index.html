@@ -6,6 +6,8 @@
     <title>Gapminder Clone</title>
     <!-- Bootstrap -->
     <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <!-- D3 Tooltip CSS -->
+    <link rel="stylesheet" href="css/d3-tip.css" />
     <!-- Custom styling -->
     <link rel="stylesheet" href="css/style.css" />
   </head>
@@ -13,21 +15,14 @@
   <body>
     <!-- Bootstrap grid setup -->
     <div class="container">
-      <div class="row">
-        <div class="legend">
-          <div class="box americas"><p>Americas</p></div>
-          <div class="box europe"><p>Europe</p></div>
-          <div class="box asia"><p>Asia</p></div>
-          <div class="box africa"><p>Africa</p></div>
-        </div>
-        <div id="chart-area"></div>
-      </div>
+      <div class="row"><div id="chart-area"></div></div>
     </div>
 
     <!-- External JS libraries -->
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/d3.min.js"></script>
+    <script src="js/d3-tip.js"></script>
     <!-- Custom JS -->
     <script src="js/main.js"></script>
   </body>

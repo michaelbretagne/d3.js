@@ -14,6 +14,30 @@ const g = d3
 
 let time = 0;
 
+// Tooltip
+const tip = d3
+  .tip()
+  .attr("class", "d3-tip")
+  .html(d => {
+    let text = `<strong>Country:</strong> <span style="color:red"> ${
+      d.country
+    }</span><br>`;
+    text += `<strong>Continent:</strong> <span style="color:red;text-transform:capitalize"> ${
+      d.continent
+    }</span><br>`;
+    text += `<strong>Life Expectancy:</strong> <span style="color:red"> ${d3.format(
+      ".2f",
+    )(d.life_exp)}</span><br>`;
+    text += `<strong>Per Capita:</strong> <span style="color:red"> ${d3.format(
+      "$,.0f",
+    )(d.income)}</span><br>`;
+    text += `<strong>Population:</strong> <span style="color:red"> ${d3.format(
+      ",.0f",
+    )(d.population)}</span><br>`;
+    return text;
+  });
+g.call(tip);
+
 // Scales
 const x = d3
   .scaleLog()
@@ -31,10 +55,36 @@ const area = d3
   .range([25 * Math.PI, 1500 * Math.PI])
   .domain([2000, 1400000000]);
 
+const continents = ["europe", "asia", "americas", "africa"];
+
 const continentColor = d3
   .scaleOrdinal()
-  .domain(["europe", "americas", "asia", "africa"])
+  .domain(continents)
   .range(["blue", "orange", "green", "purple"]);
+
+const legend = g
+  .append("g")
+  .attr("transform", `translate(${width - 10}, ${height - 125})`);
+
+continents.forEach((continent, i) => {
+  let legendRow = legend
+    .append("g")
+    .attr("transform", `translate(0, ${i * 20})`);
+
+  legendRow
+    .append("rect")
+    .attr("width", 10)
+    .attr("height", 10)
+    .attr("fill", continentColor(continent));
+
+  legendRow
+    .append("text")
+    .attr("x", -10)
+    .attr("y", 10)
+    .attr("text-anchor", "end")
+    .style("text-transform", "capitalize")
+    .text(continent);
+});
 
 // Labels
 const xLabel = g
@@ -125,6 +175,8 @@ const update = data => {
     .append("circle")
     .attr("class", "enter")
     .attr("fill", d => continentColor(d.continent))
+    .on("mouseover", tip.show)
+    .on("mouseout", tip.hide)
     .merge(circles)
     .transition(t)
     .attr("cy", d => y(d.life_exp))
