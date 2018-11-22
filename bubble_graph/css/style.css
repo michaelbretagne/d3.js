@@ -1,0 +1,9 @@
+.container {
+  margin: 100px auto;
+}
+
+#chart-area svg {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
