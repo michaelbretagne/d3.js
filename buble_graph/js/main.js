@@ -166,6 +166,16 @@ d3.json("data/data.json").then(data => {
     update(formattedData[time]);
   });
 
+  $("#date-slider").slider({
+    max: 2014,
+    min: 1800,
+    step: 1,
+    slide: (event, ui) => {
+      time = ui.value - 1800;
+      update(formattedData[time]);
+    },
+  });
+
   const step = () => {
     // Loop back when loop through all the data
     time = time < 214 ? time + 1 : 0;
@@ -216,4 +226,6 @@ const update = data => {
 
   // Update the time label
   timeLabel.text(+(time + 1800));
+  $("#year")[0].innerHTML = +(time + 1800);
+  $("#date-slider").slider("value", +(time + 1800));
 };

@@ -6,6 +6,10 @@
     <title>Gapminder Clone</title>
     <!-- Bootstrap -->
     <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" href="css/jquery-ui.min.css" />
+    <link rel="stylesheet" href="css/jquery-ui.structure.min.css" />
+    <link rel="stylesheet" href="css/jquery-ui.theme.min.css" />
     <!-- D3 Tooltip CSS -->
     <link rel="stylesheet" href="css/d3-tip.css" />
     <!-- Custom styling -->
@@ -19,6 +23,10 @@
         <div class="col-md-4 text-right">
           <button id="play-button" class="btn btn-primary">Play</button>
           <button id="reset-button" class="btn btn-primary">Reset</button>
+        </div>
+        <div class="col-md-4" id="slider-div">
+          <label>Year: <span id="year">1800</span></label>
+          <div id="date-slider"></div>
         </div>
 
         <div class="col-md-2 text-left">
@@ -38,6 +46,7 @@
 
     <!-- External JS libraries -->
     <script src="js/jquery.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/d3.min.js"></script>
     <script src="js/d3-tip.js"></script>
