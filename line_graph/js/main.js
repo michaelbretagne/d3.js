@@ -1,11 +1,16 @@
 // Main file of the line graph - Crypto currency chart
 
+let lineChart;
 const parseTime = d3.timeParse("%d/%m/%Y");
 const formatTime = d3.timeFormat("%d/%m/%Y");
 
 // Event listeners
-$("#coin-select").on("change", update);
-$("#var-select").on("change", update);
+$("#coin-select").on("change", function() {
+  lineChart.wrangleData();
+});
+$("#var-select").on("change", function() {
+  lineChart.wrangleData();
+});
 
 // Add jQuery UI slider
 $("#date-slider").slider({
@@ -38,6 +43,6 @@ d3.json("data/coins.json").then(data => {
       d["date"] = parseTime(d["date"]);
     });
   }
-  // Run the visualization for the first time
-  update();
+
+  lineChart = new LineChart("#chart-area");
 });
