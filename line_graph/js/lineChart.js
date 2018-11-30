@@ -1,0 +1,186 @@
+// Line chart - Crypto currency chart
+
+const margin = { left: 80, right: 100, top: 50, bottom: 100 },
+  height = 500 - margin.top - margin.bottom,
+  width = 800 - margin.left - margin.right;
+
+const svg = d3
+  .select("#chart-area")
+  .append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom);
+
+const g = svg
+  .append("g")
+  .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+const t = () => {
+  return d3.transition().duration(1000);
+};
+
+const bisectDate = d3.bisector(d => {
+  return d.date;
+}).left;
+
+// Add the line for the first time
+g.append("path")
+  .attr("class", "line")
+  .attr("fill", "none")
+  .attr("stroke", "grey")
+  .attr("stroke-width", "3px");
+
+// Scales
+const x = d3.scaleTime().range([0, width]);
+const y = d3.scaleLinear().range([height, 0]);
+
+// Axis generators
+const xAxisCall = d3.axisBottom().ticks(4);
+const yAxisCall = d3.axisLeft();
+
+// Axis groups
+const xAxis = g
+  .append("g")
+  .attr("class", "x axis")
+  .attr("transform", "translate(0," + height + ")");
+
+const yAxis = g.append("g").attr("class", "y axis");
+
+// Labels
+const xLabel = g
+  .append("text")
+  .attr("class", "x axisLabel")
+  .attr("y", height + 50)
+  .attr("x", width / 2)
+  .attr("font-size", "20px")
+  .attr("text-anchor", "middle")
+  .text("Time");
+
+const yLabel = g
+  .append("text")
+  .attr("class", "y axisLabel")
+  .attr("transform", "rotate(-90)")
+  .attr("y", -60)
+  .attr("x", -170)
+  .attr("font-size", "20px")
+  .attr("text-anchor", "middle")
+  .text("Price (USD)");
+
+// Function that update graph
+const update = () => {
+  const coin = $("#coin-select").val();
+  const selectedOption = $("#var-select").val();
+
+  const sliderValues = $("#date-slider").slider("values");
+  const dataTimeFiltered = filteredData[coin].filter(
+    d => d.date >= sliderValues[0] && d.date <= sliderValues[1],
+  );
+
+  // Line path generator
+  const line = d3
+    .line()
+    .x(d => x(d.date))
+    .y(d => y(d[selectedOption]));
+
+  // Set scale domains
+  x.domain(d3.extent(dataTimeFiltered, d => d.date));
+  y.domain([
+    d3.min(dataTimeFiltered, d => d[selectedOption] / 1.005),
+    d3.max(dataTimeFiltered, d => d[selectedOption] * 1.005),
+  ]);
+
+  // Fix for format values
+  const formatSi = d3.format(".2s");
+  const formatAbbreviation = x => {
+    let s = formatSi(x);
+    switch (s[s.length - 1]) {
+      case "G":
+        return s.slice(0, -1) + "B";
+      case "k":
+        return s.slice(0, -1) + "K";
+    }
+    return s;
+  };
+
+  // Update axes
+  xAxisCall.scale(x);
+  xAxis.transition(t()).call(xAxisCall);
+  yAxisCall.scale(y);
+  yAxis.transition(t()).call(yAxisCall.tickFormat(formatAbbreviation));
+
+  // Clear old tooltips
+  d3.select(".focus").remove();
+  d3.select(".overlay").remove();
+
+  // Tooltip code
+  const focus = g
+    .append("g")
+    .attr("class", "focus")
+    .style("display", "none");
+
+  focus
+    .append("line")
+    .attr("class", "x-hover-line hover-line")
+    .attr("y1", 0)
+    .attr("y2", height);
+
+  focus
+    .append("line")
+    .attr("class", "y-hover-line hover-line")
+    .attr("x1", 0)
+    .attr("x2", width);
+
+  focus.append("circle").attr("r", 5);
+
+  focus
+    .append("text")
+    .attr("x", 15)
+    .attr("dy", ".31em");
+
+  svg
+    .append("rect")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .attr("class", "overlay")
+    .attr("width", width)
+    .attr("height", height)
+    .on("mouseover", () => {
+      focus.style("display", null);
+    })
+    .on("mouseout", () => {
+      focus.style("display", "none");
+    })
+    .on("mousemove", mousemove);
+
+  function mousemove() {
+    const x0 = x.invert(d3.mouse(this)[0]);
+    const i = bisectDate(dataTimeFiltered, x0, 1);
+    const d0 = dataTimeFiltered[i - 1];
+    const d1 = dataTimeFiltered[i];
+    const d = d1 && d0 ? (x0 - d0.date > d1.date - x0 ? d1 : d0) : 0;
+
+    focus.attr(
+      "transform",
+      "translate(" + x(d.date) + "," + y(d[selectedOption]) + ")",
+    );
+
+    focus
+      .select("text")
+      .text(() => d3.format("$,")(d[selectedOption].toFixed(2)));
+
+    focus.select(".x-hover-line").attr("y2", height - y(d[selectedOption]));
+    focus.select(".y-hover-line").attr("x2", -x(d.date));
+  }
+
+  // Add line to chart
+  g.select(".line")
+    .transition(t)
+    .attr("d", line(dataTimeFiltered));
+
+  // Update y-axis label
+  var newText =
+    selectedOption == "price_usd"
+      ? "Price (USD)"
+      : selectedOption == "market_cap"
+      ? "Market Capitalization (USD)"
+      : "24 Hour Trading Volume (USD)";
+  yLabel.text(newText);
+};
