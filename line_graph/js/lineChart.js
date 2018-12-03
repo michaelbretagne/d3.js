@@ -25,20 +25,17 @@ class LineChart {
         "translate(" + self.margin.left + ", " + self.margin.top + ")",
       );
 
-    self.t = () => {
-      return d3.transition().duration(1000);
-    };
+    self.t = () => d3.transition().duration(1000);
 
     self.bisectDate = d3.bisector(d => {
       return d.date;
     }).left;
 
     // Add the line for the first time
-    self.g
+    self.linePath = self.g
       .append("path")
       .attr("class", "line")
       .attr("fill", "none")
-      .attr("stroke", "grey")
       .attr("stroke-width", "3px");
 
     // Scales
@@ -97,13 +94,8 @@ class LineChart {
   // Update elements to match the new data
   updateVis() {
     var self = this;
-    // Line path generator
-    const line = d3
-      .line()
-      .x(d => self.x(d.date))
-      .y(d => self.y(d[self.selectedOption]));
 
-    // Set scale domains
+    // Update scales
     self.x.domain(d3.extent(self.dataTimeFiltered, d => d.date));
     self.y.domain([
       d3.min(self.dataTimeFiltered, d => d[self.selectedOption] / 1.005),
@@ -203,9 +195,16 @@ class LineChart {
       focus.select(".y-hover-line").attr("x2", -self.x(d.date));
     }
 
+    // Line path generator
+    const line = d3
+      .line()
+      .x(d => self.x(d.date))
+      .y(d => self.y(d[self.selectedOption]));
+
     // Add line to chart
     self.g
       .select(".line")
+      .attr("stroke", color(self.coin))
       .transition(self.t)
       .attr("d", line(self.dataTimeFiltered));
 
