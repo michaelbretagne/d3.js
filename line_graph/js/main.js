@@ -4,6 +4,7 @@ let filteredData = {};
 let lineChart;
 let donutChart1;
 let donutChart2;
+let timeline;
 let donutData = [];
 const parseTime = d3.timeParse("%d/%m/%Y");
 const formatTime = d3.timeFormat("%d/%m/%Y");
@@ -15,6 +16,7 @@ $("#coin-select").on("change", () => {
 });
 $("#var-select").on("change", () => {
   lineChart.wrangleData();
+  timeline.wrangleData();
 });
 
 // Add jQuery UI slider
@@ -24,23 +26,37 @@ $("#date-slider").slider({
   min: parseTime("12/5/2013").getTime(),
   step: 86400000, // One day
   values: [parseTime("12/5/2013").getTime(), parseTime("31/10/2017").getTime()],
-  slide: function(event, ui) {
-    $("#dateLabel1").text(formatTime(new Date(ui.values[0])));
-    $("#dateLabel2").text(formatTime(new Date(ui.values[1])));
-    lineChart.wrangleData();
+  slide: (event, ui) => {
+    dates = ui.values.map(val => new Date(val));
+    xVals = dates.map(date => timeline.x(date));
+
+    timeline.brushComponent.call(timeline.brush.move, xVals);
   },
 });
 
-function arcClicked(arc) {
+const arcClicked = arc => {
   $("#coin-select").val(arc.data.coin);
   coinChanged();
-}
+};
 
-function coinChanged() {
+const coinChanged = () => {
   donutChart1.wrangleData();
   donutChart2.wrangleData();
   lineChart.wrangleData();
-}
+  timeline.wrangleData();
+};
+
+const brushed = () => {
+  var selection = d3.event.selection || timeline.x.range();
+  var newValues = selection.map(timeline.x.invert);
+
+  $("#date-slider")
+    .slider("values", 0, newValues[0])
+    .slider("values", 1, newValues[1]);
+  $("#dateLabel1").text(formatTime(newValues[0]));
+  $("#dateLabel2").text(formatTime(newValues[1]));
+  lineChart.wrangleData();
+};
 
 // Get the data from JSON file
 d3.json("data/coins.json").then(data => {
@@ -66,4 +82,6 @@ d3.json("data/coins.json").then(data => {
 
   donutChart1 = new DonutChart("#donut-area1", "24h_vol");
   donutChart2 = new DonutChart("#donut-area2", "market_cap");
+
+  timeline = new Timeline("#timeline-area");
 });

@@ -8,8 +8,8 @@ class LineChart {
 
   initVis() {
     var self = this;
-    self.margin = { left: 80, right: 100, top: 50, bottom: 100 };
-    self.height = 500 - self.margin.top - self.margin.bottom;
+    self.margin = { left: 80, right: 100, top: 30, bottom: 30 };
+    self.height = 350 - self.margin.top - self.margin.bottom;
     self.width = 800 - self.margin.left - self.margin.right;
 
     self.svg = d3
